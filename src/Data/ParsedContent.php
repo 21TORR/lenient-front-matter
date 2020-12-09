@@ -2,6 +2,8 @@
 
 namespace Torr\LenientFrontMatter\Data;
 
+use Torr\LenientFrontMatter\Parser\LenientFrontMatterParser;
+
 final class ParsedContent
 {
 	/** @var string */
@@ -36,6 +38,7 @@ final class ParsedContent
 	 */
 	public function getFrontMatterValue (string $key)
 	{
+		$key = LenientFrontMatterParser::normalizeFrontMatterKey($key);
 		return $this->frontMatter[$key] ?? null;
 	}
 }
