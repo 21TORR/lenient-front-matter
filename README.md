@@ -25,7 +25,7 @@ Create a new parser and parse the content:
 use Torr\LenientFrontMatter\Parser\LenientFrontMatterParser;
 
 $parser = new LenientFrontMatterParser();
-$content = $parser->parse($text);
+$content = $parser->parse("...");
 
 // returns the plain text content
 $textContent = $content->getContent();
