@@ -12,7 +12,7 @@ Installation
 Install it via composer:
 
 ```bash
-composer install 21torr/lenient-front-matter
+composer require 21torr/lenient-front-matter
 ```
 
 
