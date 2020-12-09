@@ -28,7 +28,7 @@ test
 TEXT,
 			"test",
 			[
-				"Key" => "Value",
+				"key" => "Value",
 			],
 		];
 
@@ -40,7 +40,7 @@ Key: Value
 TEXT,
 			"test",
 			[
-				"Key" => "Value",
+				"key" => "Value",
 			],
 		];
 
@@ -52,7 +52,7 @@ Key: Value
 TEXT,
 			"test",
 			[
-				"Key" => "Value",
+				"key" => "Value",
 			],
 		];
 
@@ -70,11 +70,11 @@ Key5: Colons: are: allowed.
 TEXT,
 			"test",
 			[
-				"Key" => "Overwritten",
-				"Key2" => "Value2",
-				"Key3" => "Value3",
-				"Key4" => "",
-				"Key5" => "Colons: are: allowed.",
+				"key" => "Overwritten",
+				"key2" => "Value2",
+				"key3" => "Value3",
+				"key4" => "",
+				"key5" => "Colons: are: allowed.",
 			],
 		];
 	}
@@ -88,7 +88,7 @@ TEXT,
 		$result = $parser->parse($input);
 
 		self::assertSame($expectedContent, $result->getContent());
-		self::assertEqualsCanonicalizing($expectedFrontMatter, $result->getFrontMatter());
+		self::assertEquals($expectedFrontMatter, $result->getFrontMatter());
 	}
 
 	/**
@@ -96,17 +96,17 @@ TEXT,
 	 */
 	public function testCustomSeparator () : void
 	{
-		$parser = new LenientFrontMatterParser("###+");
-		$result = $parser->parse(
-			<<<'TEXT'
+		$content = <<<'CONTENT'
 o: hai
 ###
 text
-TEXT
-);
+CONTENT;
+
+		$parser = new LenientFrontMatterParser([], "###+");
+		$result = $parser->parse($content);
 
 		self::assertSame("text", $result->getContent());
-		self::assertEqualsCanonicalizing([
+		self::assertEquals([
 			"o" => "hai",
 		], $result->getFrontMatter());
 	}
@@ -117,7 +117,7 @@ TEXT
 	public function testInvalidSeparatorTilde () : void
 	{
 		$this->expectException(InvalidSeparatorException::class);
-		new LenientFrontMatterParser("~");
+		new LenientFrontMatterParser([], "~");
 	}
 
 	/**
@@ -126,7 +126,66 @@ TEXT
 	public function testInvalidSeparatorOther () : void
 	{
 		$this->expectException(InvalidSeparatorException::class);
-		$parser = new LenientFrontMatterParser("[");
+		$parser = new LenientFrontMatterParser([], "[");
 		$parser->parse("test");
+	}
+
+	/**
+	 */
+	public function provideKeyNormalization () : iterable
+	{
+		yield ["O"];
+		yield ["TEST"];
+		yield ["test"];
+		yield ["UnReGuLaR"];
+		yield ["UNREGULAR"];
+		yield ["unregular"];
+	}
+
+
+	/**
+	 * @dataProvider provideKeyNormalization
+	 */
+	public function testKeyNormalization (string $key) : void
+	{
+		$content = <<<'CONTENT'
+o: hai
+TEST: hai
+UnReGuLaR: hai
+---
+text
+CONTENT;
+
+		$parser = new LenientFrontMatterParser();
+		$result = $parser->parse($content);
+
+		self::assertSame("hai", $result->getFrontMatterValue($key));
+	}
+
+
+	/**
+	 */
+	public function testKeyMapping () : void
+	{
+		$content = <<<'CONTENT'
+o: hai
+TEST: hai
+UnReGuLaR: hai
+---
+text
+CONTENT;
+
+		$parser = new LenientFrontMatterParser([
+			"o" => "mapped-o",
+			"test" => "mapped-test",
+			"unregular" => "mapped-unregular",
+		]);
+		$result = $parser->parse($content);
+
+		self::assertEquals([
+			"mapped-o" => "hai",
+			"mapped-test" => "hai",
+			"mapped-unregular" => "hai",
+		], $result->getFrontMatter());
 	}
 }

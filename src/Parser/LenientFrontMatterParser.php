@@ -15,7 +15,23 @@ final class LenientFrontMatterParser
 	 */
 	private $separator;
 
-	public function __construct (string $separator = "---+")
+	/**
+	 * Allows to remap keys.
+	 * The key is the value as written by the users, and the value is the transformed key.
+	 *
+	 * You must use the normalized key here.
+	 *
+	 * @var array<string, string>
+	 */
+	private $keyMapping;
+
+
+	/**
+	 */
+	public function __construct (
+		array $keyMapping = [],
+		string $separator = "---+"
+	)
 	{
 		$this->separator = $separator;
 
@@ -26,6 +42,7 @@ final class LenientFrontMatterParser
 				$separator
 			));
 		}
+		$this->keyMapping = $keyMapping;
 	}
 
 	/**
@@ -77,9 +94,20 @@ final class LenientFrontMatterParser
 				continue;
 			}
 
-			$frontMatter[\trim($split[0])] = \trim($split[1]);
+			$key = self::normalizeFrontMatterKey($split[0]);
+			$key = $this->keyMapping[$key] ?? $key;
+			$frontMatter[$key] = \trim($split[1]);
 		}
 
 		return $frontMatter;
+	}
+
+
+	/**
+	 * Normalizes the given front matter key
+	 */
+	public static function normalizeFrontMatterKey (string $key) : string
+	{
+		return \mb_strtolower(\trim($key));
 	}
 }
