@@ -42,6 +42,8 @@ $singleFrontMatterValue = $content->getFrontMatterValue("test");
 The keys of the front matter are normalized, so basically trimmed and transformed to lower case.
 So if you work with them, you always need to use the normalized version.
 
+Duplicate keys are possible, the last key will always be the one in the final parsed front matter.
+
 
 ### Key Mappings
 
